@@ -1,0 +1,4 @@
+https://towardsdatascience.com/make-dataframes-interactive-in-streamlit-c3d0c4f84ccb
+
+https://towardsdatascience.com/7-reasons-why-you-should-use-the-streamlit-aggrid-component-2d9a2b6e32f0
+
