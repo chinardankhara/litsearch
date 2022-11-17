@@ -38,4 +38,4 @@ def get_results_from_doi(doi = None, key = "referenced_works"):
 
         return cite_list
     except:
-        return None   
+        raise Exception("")   
