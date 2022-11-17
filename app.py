@@ -43,7 +43,8 @@ def df_to_aggrid(df):
 #TODO: add search by topic code
 display_search_by_doi()
 
-hide_streamlit_style = """<style> # footer {visibility: hidden;}</style>"""
+#hide streamlit footer
+hide_streamlit_style = """ <style> footer {visibility: hidden;} </style> """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 
