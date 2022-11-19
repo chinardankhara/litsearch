@@ -9,10 +9,7 @@ import json
 def get_connection(email = None):
     return OpenAlex(email)
 
-def get_results_from_id(id = None, result_type = "referenced_works", id_type = None):
-    if not id: return None
-
-    def convert_to_display_format(record):
+def convert_to_display_format(record):
         sub_key_list = set(["title", "doi", "publication_date", "host_venue", "open_access", "authorships"])
         record = {k:v for (k,v) in record.items() if k in sub_key_list}
 
@@ -33,6 +30,11 @@ def get_results_from_id(id = None, result_type = "referenced_works", id_type = N
         del record["authorships"]
     
         return record
+
+def get_results_from_id(id = None, result_type = "referenced_works", id_type = None):
+    if not id: return None
+
+    
 
     try:
         #handling the arxiv case
@@ -72,30 +74,9 @@ def get_recommended_results(search_text, exact_match = False):
     
     response = json.loads(requests.get('https://api.openalex.org/works?search=' + search_text,
      params = {'mailto': 'chinardankhara@gmail.com'}).text)['results']
+    response = pd.DataFrame.from_records([convert_to_display_format(i) for i in response])
+    response = response[['title', 'publication_date', 'doi', 'authors', 'issn', 'location', 'publisher', 'oa_url']]
     return response
-    # sub_key_list = set(["title", "doi", "publication_date", "host_venue",
-    #  "open_access", "authorships", "relevance_score"])
-
-    # for i in response:
-    #     i = {k:v for (k,v) in i.items() if k in sub_key_list}
-
-    #     i["issn"] = i["host_venue"]["issn"]
-    #     i["location"] = i["host_venue"]["display_name"]
-    #     i["publisher"] = i["host_venue"]["publisher"]
-    #     del i["host_venue"]
-
-    #     i["oa_url"] = i["open_access"]["oa_url"]
-    #     del i["open_access"]
-
-    #     i["authors"] = [j["author"]["display_name"] for j in i["authorships"]]
-    #     if len(i["authors"]) > 5:
-    #         i["authors"] = i["authors"][:5] + ["et al."]
-    #     del i["authorships"]
-    
-    # # response = pd.DataFrame.from_records(response)
-    # # response = response[['title', 'publication_date', 'doi', 'authors',
-    # #  'issn', 'location', 'publisher', 'oa_url', 'relevance_score']]
-    # return response
 
 def arxiv_to_doi(arxiv_id):
     #if the id is a link, extract the id
