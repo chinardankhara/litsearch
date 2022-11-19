@@ -5,3 +5,5 @@ diophila
 streamlit
 pandas
 arxiv
+requests
+json

@@ -3,12 +3,15 @@ import streamlit_option_menu as som
 import openalex as oa
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 
-st.set_page_config(page_title="Lit Search", layout = "wide")
+#set page title and favicon
+st.set_page_config(page_title="ScholarWeb", layout="wide")
 
-st.markdown('<h1 style="text-align: center;">Literature Search</h1>', unsafe_allow_html=True)
+st.markdown('<h1 style="text-align: center;">Welcome to ScholarWeb</h1>', unsafe_allow_html=True)
+st.markdown('<h3 style="text-align: center;">Your place for finding research, people, and more</h3>',
+ unsafe_allow_html=True)
 st.markdown('<br>', unsafe_allow_html=True)
-type_menu = som.option_menu(None, ["Search by DOI", "Search Author"],
- icons = ['123', 'person'], default_index=0, orientation="horizontal")
+type_menu = som.option_menu(None, ["Search by DOI", "Search Author", "Discovery"],
+ icons = ['123', 'person', 'search'], default_index=0, orientation="horizontal")
 
 def display_search_by_id():
     #create twto columns for result and id radio buttons
@@ -29,7 +32,7 @@ def display_search_by_id():
 
 
     try:
-        data = oa.get_results_from_id(id, result_type = result_type, id_type = id_type)
+        og_result, data = oa.get_results_from_id(id, result_type = result_type, id_type = id_type)
         data = df_to_aggrid(data)
     except:
         if id:
@@ -37,15 +40,18 @@ def display_search_by_id():
              '- so it might be a system fault. Thanks for your patience.</p>', unsafe_allow_html=True)
 
 def display_search_author():
-    #add radio button for profile and works
-    # type = st.radio("Type of results", ["Profile", "Works"], horizontal=True,
-    #  help="Profile returns information about the author. Works returns works by the author.")
-    # name = st.text_input('Search Authors',
-    #  help = "If things don't work, please try putting exact name of the author").strip()
-    #coming soon
     st.markdown('<h3 style="color:white; font-weight:bold;">Coming soon</h3>', unsafe_allow_html=True)
 
-    
+def display_discovery():
+    #add a checkbox for exact search
+    exact = st.checkbox("Exact Search", help="For multi-word phrases, exact search checks for full phrase match.")
+    #add a text input for search
+    search = st.text_input('Search Relevant Papers',
+     help = "Returns works related to the input search term")
+    if search:
+        data = oa.get_recommended_results(search, exact_match = exact)
+        st.write(data)
+        #data = df_to_aggrid(data)
 
 def df_to_aggrid(df):
         #TODO: make this function configurable
@@ -61,6 +67,8 @@ if type_menu == "Search by DOI":
     display_search_by_id()
 elif type_menu == "Search Author":
     display_search_author()
+elif type_menu == "Discovery":
+    display_discovery()
 
 
 #hide streamlit footer

@@ -3,6 +3,8 @@ import streamlit as st
 import pandas as pd
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
 import arxiv
+import requests
+import json 
 
 def get_connection(email = None):
     return OpenAlex(email)
@@ -10,7 +12,28 @@ def get_connection(email = None):
 def get_results_from_id(id = None, result_type = "referenced_works", id_type = None):
     if not id: return None
 
+    def convert_to_display_format(record):
+        sub_key_list = set(["title", "doi", "publication_date", "host_venue", "open_access", "authorships"])
+        record = {k:v for (k,v) in record.items() if k in sub_key_list}
+
+        record["issn"] = record["host_venue"]["issn"]
+        record["location"] = record["host_venue"]["display_name"]
+        record["publisher"] = record["host_venue"]["publisher"]
+        del record["host_venue"]
+
+        #extract oa_url from open_access and add it to the dict
+        record["oa_url"] = record["open_access"]["oa_url"]
+        del record["open_access"]
+
+        #process authors
+        record["authors"] = [i["author"]["display_name"] for i in record["authorships"]]
+        #if there are more than 5 authors, only show the first 5 and add "et al."
+        if len(record["authors"]) > 5:
+            record["authors"] = record["authors"][:5] + ["et al."]
+        del record["authorships"]
     
+        return record
+
     try:
         #handling the arxiv case
         if id_type == "Arxiv":
@@ -21,50 +44,61 @@ def get_results_from_id(id = None, result_type = "referenced_works", id_type = N
 
         #replace Refereced Works with referenced_works and Related Works with related_works
         result_type = result_type.replace(" ", "_").lower()
-        temp = oa.get_single_work(id, "doi")[result_type]
+        original_result = oa.get_single_work(id, "doi")
+        id_list = original_result[result_type]
 
-        cite_list = []
-        sub_key_list = set(["title", "doi", "publication_date", "host_venue", "open_access", "authorships"])
+        original_result = pd.DataFrame.from_records([convert_to_display_format(original_result)])
+        original_result = original_result[['title', 'publication_date', 'doi', 'authors', 'issn', 'location', 'publisher', 'oa_url']]
+        rel_list = []
+        for i in id_list:
+            temp = convert_to_display_format(oa.get_single_work(i, "openalex"))
+            rel_list.append(temp)
         
-        for i in temp:
-
-            temp2 = oa.get_single_work(i, "openalex")
-            temp2 = {k:v for (k,v) in temp2.items() if k in sub_key_list}
-
-            temp2["issn"] = temp2["host_venue"]["issn"]
-            temp2["location"] = temp2["host_venue"]["display_name"]
-            temp2["publisher"] = temp2["host_venue"]["publisher"]
-            del temp2["host_venue"]
-
-            #extract oa_url from open_access and add it to the dict
-            temp2["oa_url"] = temp2["open_access"]["oa_url"]
-            del temp2["open_access"]
-
-            #process authors
-            temp2["authors"] = [i["author"]["display_name"] for i in temp2["authorships"]]
-            #if there are more than 5 authors, only show the first 5 and add "et al."
-            if len(temp2["authors"]) > 5:
-                temp2["authors"] = temp2["authors"][:5] + ["et al."]
-            del temp2["authorships"]
-
-            cite_list.append(temp2)
-        #make a dataframe with sub_key_list as columns
-        cite_list = pd.DataFrame.from_records(cite_list)
-        cite_list = cite_list[['title', 'publication_date', 'doi', 'authors', 'issn', 'location', 'publisher', 'oa_url']]
-
-        return cite_list
+        del oa
+        rel_list = pd.DataFrame.from_records(rel_list)
+        rel_list = rel_list[['title', 'publication_date', 'doi', 'authors', 'issn', 'location', 'publisher', 'oa_url']]
+        
+        return original_result, rel_list
     except:
         raise Exception("")   
+
+def get_recommended_results(search_text, exact_match = False):
+    if not search_text: return None
+    #replace spaces with %20
+    search_text = search_text.replace(" ", "%20")
+    if exact_match:
+        #enclose the search text in %22
+        search_text = "%22" + search_text + "%22"
+    
+    response = json.loads(requests.get('https://api.openalex.org/works?search=' + search_text,
+     params = {'mailto': 'chinardankhara@gmail.com'}).text)['results']
+    return response
+    # sub_key_list = set(["title", "doi", "publication_date", "host_venue",
+    #  "open_access", "authorships", "relevance_score"])
+
+    # for i in response:
+    #     i = {k:v for (k,v) in i.items() if k in sub_key_list}
+
+    #     i["issn"] = i["host_venue"]["issn"]
+    #     i["location"] = i["host_venue"]["display_name"]
+    #     i["publisher"] = i["host_venue"]["publisher"]
+    #     del i["host_venue"]
+
+    #     i["oa_url"] = i["open_access"]["oa_url"]
+    #     del i["open_access"]
+
+    #     i["authors"] = [j["author"]["display_name"] for j in i["authorships"]]
+    #     if len(i["authors"]) > 5:
+    #         i["authors"] = i["authors"][:5] + ["et al."]
+    #     del i["authorships"]
+    
+    # # response = pd.DataFrame.from_records(response)
+    # # response = response[['title', 'publication_date', 'doi', 'authors',
+    # #  'issn', 'location', 'publisher', 'oa_url', 'relevance_score']]
+    # return response
 
 def arxiv_to_doi(arxiv_id):
     #if the id is a link, extract the id
     if "arxiv.org" in arxiv_id:
         arxiv_id = arxiv_id.split("/")[-1]
     return next(arxiv.Search(id_list = [arxiv_id]).results()).doi
-# def get_author_info(name, key = "Profile"):
-#     if not name: return None
-#     oa = get_connection('chinardankhara@gmail.com') #TODO: this will need parameterization
-#     try:
-#         oa.get_single_author(name)
-#     except:
-#         raise Exception("")
