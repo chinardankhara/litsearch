@@ -30,7 +30,6 @@ def display_search_by_id():
     if id and not id.startswith('https://'):
         id = 'https://' + id
 
-
     try:
         og_result, data = oa.get_results_from_id(id, result_type = result_type, id_type = id_type)
         data = df_to_aggrid(data)
@@ -50,7 +49,7 @@ def display_discovery():
      help = "Returns works related to the input search term")
     if search:
         data = oa.get_recommended_results(search, exact_match = exact)
-        st.write(data)
+        data = df_to_aggrid(data)
         #data = df_to_aggrid(data)
 
 def df_to_aggrid(df):
