@@ -1,7 +1,6 @@
 from diophila import OpenAlex
 import streamlit as st
 import pandas as pd
-from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
 import arxiv
 import requests
 import json 
@@ -92,8 +91,11 @@ def get_related_results(id = None, result_type = "referenced_works", id_type = "
         
         del oa
         rel_list = pd.DataFrame.from_records(rel_list)
-        rel_list = rel_list[['title', 'publication_date', 'doi', 'authors', 'issn', 'location', 'publisher', 'oa_url']]
-        
+        rel_list = rel_list[['title', 'publication_date', 'doi', 'authors', 'issn', 'location',
+         'publisher', 'oa_url']]
+        #rename columns with proper names
+        rel_list.columns = ["Title", "Publication Date", "DOI", "Authors", "ISSN", "Location",
+         "Publisher", "Open Access URL"]
         return original_result, rel_list
     except:
         raise Exception("")   
@@ -119,6 +121,8 @@ def get_recommended_results(search_text, exact_match = False):
      params = {'mailto': 'chinardankhara@gmail.com'}).text)['results']
     response = pd.DataFrame.from_records([convert_to_display_format(i) for i in response])
     response = response[['title', 'publication_date', 'doi', 'authors', 'issn', 'location', 'publisher', 'oa_url']]
+    response.columns = ["Title", "Publication Date", "DOI", "Authors", "ISSN", "Location",
+         "Publisher", "Open Access URL"]
     return response
 
 def arxiv_to_doi(arxiv_id):

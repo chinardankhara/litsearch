@@ -1,12 +1,12 @@
 import streamlit as st
 import streamlit_option_menu as som
 import openalex as oa
-from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
+from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
 
 #set page title and favicon
 st.set_page_config(page_title="ScholarWeb", layout="wide")
 
-#make three columns in ratio 1:3:1
+#adding raise issue link to the right
 col1, col2, col3 = st.columns([1,3,1])
 with col3:
     link = '[Report a bug / Request a feature](https://forms.gle/5M564n5YFtAVtGHi8)'
@@ -69,11 +69,14 @@ def df_to_aggrid(df):
     streamlit aggrid is a wrapper for ag-grid, a javascript library for displaying data in a table
     """
     #TODO: make this function configurable
+    cell_renderer = JsCode("""function(params) {return `<a href=${params.value} target="_blank">${params.value}</a>`}""")
     gb = GridOptionsBuilder.from_dataframe(df)
     gb.configure_pagination(paginationAutoPageSize=True) #Add pagination
     gb.configure_side_bar() #Add a sidebar
+    gb.configure_column("DOI", cellRenderer=cell_renderer) #Add a link to the DOI column
+    gb.configure_column("Open Access URL", cellRenderer=cell_renderer) #Add a link to the Open Access URL column
     gridOptions = gb.build()   
-    df = AgGrid(df, gridOptions=gridOptions)
+    df = AgGrid(df, gridOptions=gridOptions, allow_unsafe_jscode=True)
     return df
 
 
