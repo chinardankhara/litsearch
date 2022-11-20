@@ -7,39 +7,73 @@ import requests
 import json 
 
 def get_connection(email = None):
-    return OpenAlex(email)
+    """_This function returns an OpenAlex connection object.
+
+    Args:
+        email (string): Defaults to None.
+
+    Returns:
+        _type_: connection object
+    """
+    try:
+        return OpenAlex(email)
+    except:
+        raise Exception("Invalid email address")
 
 def convert_to_display_format(record):
-        sub_key_list = set(["title", "doi", "publication_date", "host_venue", "open_access", "authorships"])
-        record = {k:v for (k,v) in record.items() if k in sub_key_list}
+    """This function takes in a JSON record and filters based on fixed set of fields
+    Not recommended to general use
 
-        record["issn"] = record["host_venue"]["issn"]
-        record["location"] = record["host_venue"]["display_name"]
-        record["publisher"] = record["host_venue"]["publisher"]
-        del record["host_venue"]
+    Args:
+        record (JSON record/dict): Single record from OpenAlex
 
-        #extract oa_url from open_access and add it to the dict
-        record["oa_url"] = record["open_access"]["oa_url"]
-        del record["open_access"]
+    Returns:
+        JSON record/dict: filtered and processed information for display
+    """
+    sub_key_list = set(["title", "doi", "publication_date", "host_venue", "open_access", "authorships"])
+    record = {k:v for (k,v) in record.items() if k in sub_key_list}
 
-        #process authors
-        record["authors"] = [i["author"]["display_name"] for i in record["authorships"]]
-        #if there are more than 5 authors, only show the first 5 and add "et al."
-        if len(record["authors"]) > 5:
-            record["authors"] = record["authors"][:5] + ["et al."]
-        del record["authorships"]
+    record["issn"] = record["host_venue"]["issn"]
+    record["location"] = record["host_venue"]["display_name"]
+    record["publisher"] = record["host_venue"]["publisher"]
+    del record["host_venue"]
+
+    #extract oa_url from open_access and add it to the dict
+    record["oa_url"] = record["open_access"]["oa_url"]
+    del record["open_access"]
+
+    #process authors
+    record["authors"] = [i["author"]["display_name"] for i in record["authorships"]]
+    #if there are more than 5 authors, only show the first 5 and add "et al."
+    if len(record["authors"]) > 5:
+        record["authors"] = record["authors"][:5] + ["et al."]
+    del record["authorships"]
     
-        return record
+    return record
 
-def get_results_from_id(id = None, result_type = "referenced_works", id_type = None):
+def get_related_results(id = None, result_type = "referenced_works", id_type = "DOI"): #TODO: add title support
+    """
+    _summary_: This function returns a dataframe of results from OpenAlex based on the id and result_type
+    
+    Args:
+        id (str): DOI or arXiv ID string
+        result_type (str): Defaults to "referenced_works"
+        id_type (str): Defaults to "DOI"
+
+    Returns:
+        original_result and related results: Dataframe of results
+    """
     if not id: return None
-
-    
 
     try:
         #handling the arxiv case
         if id_type == "Arxiv":
             id = arxiv_to_doi(id)
+        elif id_type == "DOI":
+            if id and "doi.org/" not in id:
+                id = "doi/" + id
+            if id and not id.startswith('https://'):
+                id = 'https://' + id
 
         #getting openalex connection
         oa = get_connection('chinardankhara@gmail.com') #TODO: this will need parameterization
@@ -65,6 +99,15 @@ def get_results_from_id(id = None, result_type = "referenced_works", id_type = N
         raise Exception("")   
 
 def get_recommended_results(search_text, exact_match = False):
+    """_summary_: This function returns a dataframe of recommended results from OpenAlex based on the search_text
+
+    Args:
+        search_text (str): Single or multiple word phrases
+        exact_match (bool, optional): Defaults to False. If True, only exact matches are returned
+
+    Returns:
+        DataFrame: Dataframe of recommended results computed by OpenAlex
+    """
     if not search_text: return None
     #replace spaces with %20
     search_text = search_text.replace(" ", "%20")
@@ -79,6 +122,14 @@ def get_recommended_results(search_text, exact_match = False):
     return response
 
 def arxiv_to_doi(arxiv_id):
+    """_summary_: This function converts an arXiv ID to a DOI
+
+    Args:
+        arxiv_id (str): None
+
+    Returns:
+        str: None
+    """
     #if the id is a link, extract the id
     if "arxiv.org" in arxiv_id:
         arxiv_id = arxiv_id.split("/")[-1]
