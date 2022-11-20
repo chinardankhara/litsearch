@@ -6,6 +6,12 @@ from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 #set page title and favicon
 st.set_page_config(page_title="ScholarWeb", layout="wide")
 
+#make three columns in ratio 1:3:1
+col1, col2, col3 = st.columns([1,3,1])
+with col3:
+    link = '[Report a bug / Request a feature](https://forms.gle/5M564n5YFtAVtGHi8)'
+    st.markdown(link, unsafe_allow_html=True)
+
 #set title and description display
 st.markdown('<h1 style="text-align: center;">Welcome to ScholarWeb</h1>', unsafe_allow_html=True)
 st.markdown('<h3 style="text-align: center;">Your place for finding research, people, and more</h3>',
