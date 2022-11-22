@@ -32,7 +32,7 @@ def display_search_by_id():
         result_type = st.radio("Type of results", ["Referenced Works", "Related Works"], horizontal=True,
      help="Referenced works are works that are cited by the given DOI. Related works are works that are similar to the given DOI - generated algorithmically.")
     with col2:
-        id_type = st.radio("Type of ID", ["Title", "DOI", "Arxiv"], horizontal=True,
+        id_type = st.radio("Type of ID", ["DOI", "Arxiv"], horizontal=True,
      help="DOI is the Digital Object Identifier. Arxiv is the Arxiv ID.")
     
     id = st.text_input('Search ID',
