@@ -18,8 +18,8 @@ st.markdown('<h3 style="text-align: center;">Your place for finding research, pe
  unsafe_allow_html=True)
 #add an option menu
 st.markdown('<br>', unsafe_allow_html=True)
-type_menu = som.option_menu(None, ["Related Papers", "Search Author", "Discover"],
- icons = ['123', 'person', 'search'], default_index=0, orientation="horizontal")
+type_menu = som.option_menu(None, ["Related Papers", "Discover"],
+ icons = ['123', 'search'], default_index=0, orientation="horizontal")
 
 def display_search_by_id():
     """_summary_: This function displays the search by id section of the app
@@ -45,10 +45,7 @@ def display_search_by_id():
         if id:
             st.markdown('<p style="color:white; font-weight:bold;">Invalid ID. The application is under development' +
              '- so it might be a system fault. Thanks for your patience.</p>', unsafe_allow_html=True)
-
-def display_search_author():
-    st.markdown('<h3 style="color:white; font-weight:bold;">Coming soon</h3>', unsafe_allow_html=True)
-
+        
 def display_discovery():
     """_summary_: This function displays the discovery section of the app
     For logic, check get_recommended_results()
@@ -61,7 +58,6 @@ def display_discovery():
     if search:
         data = oa.get_recommended_results(search, exact_match = exact)
         data = df_to_aggrid(data)
-        #data = df_to_aggrid(data)
 
 def df_to_aggrid(df):
     """
@@ -82,8 +78,6 @@ def df_to_aggrid(df):
 
 if type_menu == "Related Papers":
     display_search_by_id()
-elif type_menu == "Search Author":
-    display_search_author()
 elif type_menu == "Discover":
     display_discovery()
 
