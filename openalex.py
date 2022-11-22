@@ -5,6 +5,7 @@ import arxiv
 import requests
 import json 
 
+@st.experimental_singleton
 def get_connection(email = None):
     """_This function returns an OpenAlex connection object.
 
@@ -50,6 +51,7 @@ def convert_to_display_format(record):
     
     return record
 
+@st.experimental_memo
 def get_related_results(id = None, result_type = "referenced_works", id_type = "DOI"): #TODO: add title support
     """
     _summary_: This function returns a dataframe of results from OpenAlex based on the id and result_type
@@ -100,6 +102,7 @@ def get_related_results(id = None, result_type = "referenced_works", id_type = "
     except:
         raise Exception("")   
 
+@st.experimental_memo
 def get_recommended_results(search_text, exact_match = False):
     """_summary_: This function returns a dataframe of recommended results from OpenAlex based on the search_text
 
