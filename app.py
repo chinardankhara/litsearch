@@ -19,7 +19,7 @@ st.markdown('<h3 style="text-align: center;">Your place for finding research, pe
 #add an option menu
 st.markdown('<br>', unsafe_allow_html=True)
 type_menu = som.option_menu(None, ["Related Papers", "Discover", "Find People"],
- icons = ['123', 'search'], default_index=0, orientation="horizontal")
+ icons = ['123', 'search', 'person'], default_index=0, orientation="horizontal")
 
 def display_search_by_id():
     """_summary_: This function displays the search by id section of the app
