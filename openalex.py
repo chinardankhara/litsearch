@@ -67,6 +67,8 @@ def get_related_results(id = None, result_type = "referenced_works", id_type = "
     if not id: return None
 
     try:
+        if id_type == "Title":
+            test_autocomplete(id)
         #handling the arxiv case
         if id_type == "Arxiv":
             id = arxiv_to_doi(id)

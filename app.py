@@ -18,7 +18,7 @@ st.markdown('<h3 style="text-align: center;">Your place for finding research, pe
  unsafe_allow_html=True)
 #add an option menu
 st.markdown('<br>', unsafe_allow_html=True)
-type_menu = som.option_menu(None, ["Related Papers", "Discover"],
+type_menu = som.option_menu(None, ["Related Papers", "Discover", "Find People"],
  icons = ['123', 'search'], default_index=0, orientation="horizontal")
 
 def display_search_by_id():
@@ -59,6 +59,10 @@ def display_discovery():
         data = oa.get_recommended_results(search, exact_match = exact)
         data = df_to_aggrid(data)
 
+def display_find_people():
+    st.markdown('<p style="color:white; font-weight:bold;">This feature is under development.</p>', unsafe_allow_html=True)
+
+
 def df_to_aggrid(df):
     """
     _summary_: This function converts a pandas dataframe to a streamlit aggrid
@@ -75,12 +79,12 @@ def df_to_aggrid(df):
     df = AgGrid(df, gridOptions=gridOptions, allow_unsafe_jscode=True)
     return df
 
-
 if type_menu == "Related Papers":
     display_search_by_id()
 elif type_menu == "Discover":
     display_discovery()
-
+elif type_menu == "Find People":
+    display_find_people()
 
 #hide streamlit footer
 hide_streamlit_style = """ <style> footer {visibility: hidden;} </style> """
