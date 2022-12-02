@@ -105,7 +105,7 @@ def get_related_results(id = None, result_type = "referenced_works", id_type = "
         raise Exception("")   
 
 @st.experimental_memo
-def get_recommended_results(search_text, exact_match = False):
+def get_recommended_results(search_text, entity_type = "All", exact_match = False):
     """_summary_: This function returns a dataframe of recommended results from OpenAlex based on the search_text
 
     Args:
@@ -122,8 +122,17 @@ def get_recommended_results(search_text, exact_match = False):
         #enclose the search text in %22
         search_text = "%22" + search_text + "%22"
     
-    response = json.loads(requests.get('https://api.openalex.org/works?search=' + search_text,
-     params = {'mailto': 'chinardankhara@gmail.com'}).text)['results']
+    #dictionary that matches entity type to crossref type
+    type_match = {"Journal Articles": "journal-article", "Data": "dataset", "Reports": "report",
+     "Proceedings Articles": "proceedings-article", "Dissertations": "dissertation", "Books": "book"}
+    
+    query_string = 'https://api.openalex.org/works?filter=display_name.search:' + search_text + ',abstract.search:' + search_text + ',title.search:' + search_text
+
+    if entity_type != "All":
+        entity_type = type_match[entity_type]
+        query_string += ',type:' + entity_type
+
+    response = json.loads(requests.get(query_string, params = {'mailto': 'chinardankhara@gmail.com'}).text)['results']
     response = pd.DataFrame.from_records([convert_to_display_format(i) for i in response])
     response = response[['title', 'publication_date', 'doi', 'authors', 'issn', 'location', 'publisher', 'oa_url']]
     response.columns = ["Title", "Publication Date", "DOI", "Authors", "ISSN", "Location",

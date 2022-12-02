@@ -14,7 +14,7 @@ st.markdown('<h3 style="text-align: center;">Your place for finding research, pe
  unsafe_allow_html=True)
 #add an option menu
 st.markdown('<br>', unsafe_allow_html=True)
-type_menu = som.option_menu(None, ["Related Papers", "Discover", "Find People"],
+type_menu = som.option_menu(None, ["Discover", "Related Papers", "Find People"],
  icons = ['123', 'search', 'person'], default_index=0, orientation="horizontal")
 
 def display_search_by_id():
@@ -46,13 +46,19 @@ def display_discovery():
     """_summary_: This function displays the discovery section of the app
     For logic, check get_recommended_results()
     """
-    #add a checkbox for exact search
-    exact = st.checkbox("Exact Search", help="For multi-word phrases, exact search checks for full phrase match.")
+    col1, col2 = st.columns(2)
+    with col1:
+        #add a select list
+        search_list = ["All", "Journal Articles", "Proceedings Articles", "Reports", "Dissertations", "Reports", "Books"]
+        search_type = st.selectbox("Search Type", options = search_list, index = 0)
+    with col2:
+        #add a checkbox for exact search
+        exact = st.checkbox("Exact Search", help="For multi-word phrases, exact search checks for full phrase match.")
+    
     #add a text input for search
-    search = st.text_input('Search Relevant Papers',
-     help = "Returns works related to the input search term")
+    search = st.text_input('', help = "Returns works related to the input search term")
     if search:
-        data = oa.get_recommended_results(search, exact_match = exact)
+        data = oa.get_recommended_results(search, entity_type = search_type, exact_match = exact)
         data = df_to_aggrid(data)
 
 def display_find_people():
