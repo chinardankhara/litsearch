@@ -3,14 +3,10 @@ import streamlit_option_menu as som
 import openalex as oa
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
 
-#set page title and favicon
-st.set_page_config(page_title="ScholarWeb", layout="wide")
-
-#adding raise issue link to the right
-col1, col2, col3 = st.columns([1,3,1])
-with col3:
-    link = '[Report a bug / Request a feature](https://forms.gle/5M564n5YFtAVtGHi8)'
-    st.markdown(link, unsafe_allow_html=True)
+#set page title and favicon and redirect links
+menu_items = {"Report a Bug": "https://github.com/chinardankhara/litsearch/issues",
+"Get Help": "https://www.linkedin.com/in/chinardankhara", "About": ""}
+st.set_page_config(page_title="ScholarWeb", layout="wide", menu_items=menu_items)
 
 #set title and description display
 st.markdown('<h1 style="text-align: center;">Welcome to ScholarWeb</h1>', unsafe_allow_html=True)
@@ -90,6 +86,14 @@ elif type_menu == "Find People":
 hide_streamlit_style = """ <style> footer {visibility: hidden;} </style> """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
+padding = 5
+st.markdown(f""" <style>
+    .reportview-container .main .block-container{{
+        padding-top: {padding}rem;
+        padding-right: {padding}rem;
+        padding-left: {padding}rem;
+        padding-bottom: {padding}rem;
+    }} </style> """, unsafe_allow_html=True)
 
 
 
