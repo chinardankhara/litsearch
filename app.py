@@ -46,12 +46,12 @@ def display_discovery():
     """_summary_: This function displays the discovery section of the app
     For logic, check get_recommended_results()
     """
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns([2,2,1])
     with col1:
         #add a select list
         search_list = ["All", "Journal Articles", "Proceedings Articles", "Reports", "Dissertations", "Reports", "Books"]
         search_type = st.selectbox("Search Type", options = search_list, index = 0)
-    with col2:
+    with col3:
         #add a checkbox for exact search
         exact = st.checkbox("Exact Search", help="For multi-word phrases, exact search checks for full phrase match.")
     
